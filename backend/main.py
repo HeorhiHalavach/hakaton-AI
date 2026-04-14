@@ -61,3 +61,12 @@ async def get_history(db: Session = Depends(get_db)):
         return {"status": "success", "data": history}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+@app.delete("/api/clear")
+async def clear_database(db: Session = Depends(get_db)):
+    try:
+        db.query(DiaryEntryDB).delete()
+        db.commit()
+        return {"status": "success", "message": "Baza została wyczyszczona!"}
+    except Exception as e:
+        db.rollback()
+        return {"status": "error", "message": str(e)}

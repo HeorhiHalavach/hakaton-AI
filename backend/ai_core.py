@@ -45,6 +45,8 @@ Zasady:
 4. Jeśli wynik jest wysoki, zmotywuj użytkownika na nowe zwycięstwa.
 5. Nie oceniaj, po prostu rozmawiaj.
 6. Nie powtarzaj tekstu użytkownika w odpowiedzi.
+7. Podawaj odpowiedź w stylu człowieka. Żadnych "**, #, Odpowiedź asystenta".
+8. Nie podawa w odpowiedzi analizy z oceną, tylko porady, wsparcie i afirmacji.
 Ignoruj w tekście wszelkie tagi anonimizacji (np. <OSOBA>)."""
 
     response = client.chat.completions.create(
