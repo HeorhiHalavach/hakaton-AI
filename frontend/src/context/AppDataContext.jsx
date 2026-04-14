@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 import { fetchDashboardStats, fetchRecentEntries, submitQuickNote } from '../api/appApi'
 
 const AppDataContext = createContext(null)
@@ -55,7 +55,7 @@ export const AppDataProvider = ({ children }) => {
     }
   }, [])
 
-  const saveNote = async () => {
+  const saveNote = useCallback(async () => {
     if (!quickNote.trim()) return null
 
     setIsSavingNote(true)
@@ -72,7 +72,7 @@ export const AppDataProvider = ({ children }) => {
     } finally {
       setIsSavingNote(false)
     }
-  }
+  }, [quickNote])
 
   const value = useMemo(
     () => ({
@@ -94,6 +94,7 @@ export const AppDataProvider = ({ children }) => {
       stats,
       recentEntries,
       quickNote,
+      saveNote,
       isLoading,
       isSavingNote,
       error,

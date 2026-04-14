@@ -8,7 +8,7 @@ export const Dashboard = () => {
     <div className="flex h-screen w-full bg-[#0d0a15] text-gray-200 font-sans overflow-hidden">
       <aside className="w-20 lg:w-64 bg-[#151123] border-r border-purple-900/30 flex flex-col items-center lg:items-start py-8 z-20">
         <div className="hidden lg:block px-8 mb-12">
-          <h1 className="text-2xl font-black text-[#fbbf24] tracking-widest">AETERNA</h1>
+          <h1 className="text-1xl font-black text-[#fbbf24] tracking-widest">Nawigator Umysłu</h1>
           <p className="text-xs text-purple-400 mt-1 uppercase tracking-widest">Nawigator Umysłu</p>
         </div>
 
