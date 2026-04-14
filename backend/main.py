@@ -65,7 +65,7 @@ async def get_history(db: Session = Depends(get_db)):
 @app.get("/api/statistics/weekly")
 async def get_weekly_statistics(db: Session = Depends(get_db)):
     try:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
         start_date = now - timedelta(days=7)
 
         entries = db.query(DiaryEntryDB).filter(
@@ -94,8 +94,7 @@ async def get_weekly_statistics(db: Session = Depends(get_db)):
 @app.get("/api/statistics/monthly")
 async def get_monthly_statistics(db: Session = Depends(get_db)):
     try:
-
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
         start_date = now - timedelta(days=30)
 
         entries = db.query(DiaryEntryDB).filter(
