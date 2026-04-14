@@ -9,9 +9,6 @@ anonymizer = DataAnonymizer()
 
 nlp_model = pipeline("sentiment-analysis", model="bardsai/twitter-sentiment-pl-base", top_k=None)
 
-
-
-
 def get_fluid_score(text):
     sentences = re.split(r'(?<=[.!?,])\s+', text.strip())
     if not sentences: sentences = [text]
@@ -66,23 +63,3 @@ Ignoruj w tekście wszelkie tagi anonimizacji (np. <OSOBA>)."""
         "score": round(mood_score, 2),
         "response": bielik_reply
     }
-test_texts = [
-    "To był genialny dzień! Wszystko się udało i jestem mega szczęśliwy.",
-
-    "Tragedia. Wszystko się wali, mam dość tego dnia и chcę tylko spać.",
-
-    "Dzisiaj jestem nie wyspany, ale w końcu dzień nie jest taki trudny. Było wesoło.",
-
-    "Fatalnie zacząłem poranek, zadzwoniła mi Anna, jej numer telefonu +48795610431 spóźniłem się na autobus. Ale obiad był pyszny.",
-
-    "Zwykły dzień. Robiłem zakupy, sprzątałem mieszkanie. Nic nowgo.",
-
-    "Wszystko w porządku, ale jakoś tak mi smutno bez powodu.",
-
-"Dzisiaj rano czułem się fatalnie, po prostu nie miałem siły wstać z łóżka. Potem jednak wypiłem mocną kawę i słońce zaczęło świecić przez okno, co trochę poprawiło mi humor. W pracy było średnio, szef znowu marudził, ale przynajmniej skończyłem ważny projekt przed czasem. Wieczorem czuję się zmęczony, ale w sumie dumny z siebie. Mam nadzieję, że jutro będzie jeszcze lepiej, choć lęk przed przyszłością wciąż gdzieś tam siedzi."
-]
-for text in test_texts:
-    result = process_user_note(text)
-
-    print(f"Wynik NLP: {result['score']} / 5")
-    print(f"Bielik mówi:\n{result['response']}")
