@@ -47,6 +47,7 @@ Zasady:
 3. Jeśli wynik jest średni, doceń wysiłek użytkownika.
 4. Jeśli wynik jest wysoki, zmotywuj użytkownika na nowe zwycięstwa.
 5. Nie oceniaj, po prostu rozmawiaj.
+6. Nie powtarzaj tekstu użytkownika w odpowiedzi.
 Ignoruj w tekście wszelkie tagi anonimizacji (np. <OSOBA>)."""
 
     response = client.chat.completions.create(

@@ -2,12 +2,13 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from database import DiaryEntryDB, get_db
-from srsly.ruamel_yaml import timestamp
 
+# Импорты твоих файлов
+from database import DiaryEntryDB, get_db
 from ai_core import process_user_note
 
-app  = FastAPI()
+app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,45 +17,47 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class DiaryEntry(BaseModel):
     text: str
+
+
 @app.post("/api/analyze")
 async def analyze_text(entry: DiaryEntry, db: Session = Depends(get_db)):
     try:
         result = process_user_note(entry.text)
+ 
         new_entry = DiaryEntryDB(
-            original_text=entry.text,
-            score = result["score"],
-            response = result["response"],
+            og_text=entry.text,
+            score=result["score"],
+            response=result["response"]
         )
         db.add(new_entry)
         db.commit()
         db.refresh(new_entry)
-        return {"status": "success", "score": score, "response": response}
+
+        return {
+            "status": "success",
+            "score": result["score"],
+            "response": result["response"]
+        }
     except Exception as e:
-        return {"status" : "error", "message" : str(e)}
+        return {"status": "error", "message": str(e)}
+
+
 @app.get("/api/history")
 async def get_history(db: Session = Depends(get_db)):
     try:
-        entries = db.query(DiaryEntry).order_by(DiaryEntryDB.timestamp.asc()).all()
+        entries = db.query(DiaryEntryDB).order_by(DiaryEntryDB.timestamp.asc()).all()
+
         history = [{
             "id": e.id,
-            "date": timestamp,
+            "date": e.timestamp,
             "og_text": e.original_text,
             "score": e.score,
-            "response": e.response,
+            "response": e.response
+        } for e in entries]
 
-        }
-        for e in entries
-        ]
         return {"status": "success", "data": history}
     except Exception as e:
-        return {"status" : "error", "message" : str(e)}
-
-
-
-
-
-
-
-
+        return {"status": "error", "message": str(e)}
