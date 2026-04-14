@@ -28,6 +28,12 @@ export const Journal = () => {
           </button>
           <span className={`${isDark ? 'text-gray-400' : 'text-[#7b6755]'}`}>Możesz zapisać krótką refleksję na dziś.</span>
         </div>
+        {isSavingNote && (
+          <div className={`mt-4 flex items-center gap-3 rounded-2xl p-4 text-sm ${isDark ? 'bg-[#272146]/80 text-gray-200' : 'bg-[#f4e5d1] text-[#6e5644]'}`}>
+            <span className={`inline-block h-4 w-4 rounded-full border-2 ${isDark ? 'border-slate-200 border-t-transparent' : 'border-[#6e5644] border-t-transparent'} animate-spin`} />
+            <span>Oczekiwanie na odpowiedź serwera</span>
+          </div>
+        )}
         {error && (
           <div className={`mt-4 rounded-xl p-3 text-sm ${isDark ? 'bg-red-500/10 border border-red-500/20 text-red-200' : 'bg-red-100 border border-red-200 text-red-800'}`}>
             Błąd zapisu: {error.message}
@@ -45,6 +51,12 @@ export const Journal = () => {
               <div key={entry.id} className={`rounded-xl p-4 ${isDark ? 'bg-[#0d0a15]/50' : 'bg-[#f6ece0]'}`}>
                 <p className={`text-xs mb-1 ${isDark ? 'text-[#fbbf24]' : 'text-[#ae865f]'}`}>{entry.date}</p>
                 <p className={`text-sm whitespace-pre-line ${isDark ? 'text-gray-300' : 'text-[#6e5644]'}`}>{entry.text}</p>
+                {entry.response && (
+                  <div className={`mt-4 rounded-2xl p-4 ${isDark ? 'bg-[#2d2544]/80 border border-purple-500/20' : 'bg-[#f1e2d0] border border-[#d3b89a]'}`}>
+                    <p className={`text-xs uppercase tracking-widest mb-2 ${isDark ? 'text-[#9f7aea]' : 'text-[#a66f3a]'}`}>Odpowiedź backendu</p>
+                    <p className={`text-sm whitespace-pre-line ${isDark ? 'text-gray-200' : 'text-[#5f4b3a]'}`}>{entry.response}</p>
+                  </div>
+                )}
               </div>
             ))
           )}
