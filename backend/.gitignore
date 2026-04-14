@@ -2,6 +2,12 @@
 
 .venv/
 venv/
+env/
+
+*.db
+*.sqlite
+*.sqlite3
+diary.db
 
 __pycache__/
 *.pyc
