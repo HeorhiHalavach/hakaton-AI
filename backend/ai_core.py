@@ -1,8 +1,9 @@
 import re
 from openai import OpenAI
 from transformers import pipeline
-from main import api_url, api_key
+from config import api_key, api_url
 from anonymizer import DataAnonymizer
+
 
 client = OpenAI(api_key=api_key, base_url=api_url)
 anonymizer = DataAnonymizer()
