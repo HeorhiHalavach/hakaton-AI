@@ -75,9 +75,23 @@ export const AppDataProvider = ({ children }) => {
   })
   const [recentEntries, setRecentEntries] = useState([])
   const [quickNote, setQuickNote] = useState('')
+  const [theme, setTheme] = useState('dark')
   const [isLoading, setIsLoading] = useState(true)
   const [isSavingNote, setIsSavingNote] = useState(false)
   const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem('theme')
+    if (savedTheme) {
+      setTheme(savedTheme)
+    }
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+    document.body.style.backgroundColor = theme === 'dark' ? '#0d0a15' : '#f5eee3'
+    window.localStorage.setItem('theme', theme)
+  }, [theme])
 
   useEffect(() => {
     let active = true
@@ -136,6 +150,8 @@ export const AppDataProvider = ({ children }) => {
       recentEntries,
       quickNote,
       setQuickNote,
+      theme,
+      setTheme,
       saveNote,
       isLoading,
       isSavingNote,
@@ -147,6 +163,7 @@ export const AppDataProvider = ({ children }) => {
       stats,
       recentEntries,
       quickNote,
+      theme,
       saveNote,
       isLoading,
       isSavingNote,
