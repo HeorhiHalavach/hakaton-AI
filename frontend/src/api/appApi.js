@@ -17,17 +17,14 @@ async function request(endpoint, options = {}) {
   return response.status === 204 ? null : response.json()
 }
 
-export async function fetchDashboardStats() {
-  return await request('/dashboard/stats')
+export async function fetchHistory() {
+  const result = await request('/api/history')
+  return result.data ?? result
 }
 
-export async function fetchRecentEntries() {
-  return await request('/recent-entries')
-}
-
-export async function submitQuickNote(note) {
-  return await request('/quick-note', {
+export async function analyzeNote(text) {
+  return await request('/api/analyze', {
     method: 'POST',
-    body: JSON.stringify({ note }),
+    body: JSON.stringify({ text }),
   })
 }

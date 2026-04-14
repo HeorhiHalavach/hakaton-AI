@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
-import { fetchDashboardStats, fetchRecentEntries, submitQuickNote } from '../api/appApi'
+import { fetchHistory, analyzeNote } from '../api/appApi'
 
 const AppDataContext = createContext(null)
 
@@ -10,14 +10,68 @@ const defaultMenuItems = [
   { id: 'settings', label: 'Ustawienia' },
 ]
 
+const formatDate = (value) => {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return String(value)
+  }
+  return date.toLocaleDateString('pl-PL', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+
+const normalizeEntry = (entry, fallbackText = '') => {
+  const text = entry.og_text || entry.original_text || entry.text || fallbackText || ''
+  const date = entry.date || entry.timestamp || new Date().toISOString()
+  const score = typeof entry.score === 'number' ? entry.score : parseFloat(entry.score) || 0
+  const response = entry.response || ''
+
+  return {
+    id: entry.id ?? `${Date.now()}`,
+    date: formatDate(date),
+    text,
+    score,
+    response,
+  }
+}
+
+const normalizeHistory = (items) => {
+  if (!Array.isArray(items)) return []
+  return items.map((item) => normalizeEntry(item))
+}
+
+const computeStats = (entries) => {
+  if (!entries.length) {
+    return {
+      streakDays: 0,
+      weeklyMood: 'Brak danych',
+      moodLabel: 'Brak danych',
+      moodTrend: [],
+    }
+  }
+
+  const scoreSum = entries.reduce((sum, entry) => sum + (Number(entry.score) || 0), 0)
+  const average = scoreSum / entries.length
+  const moodLabel = average >= 4 ? 'Dobrze' : average >= 2.5 ? 'Stabilnie' : 'Słabo'
+
+  return {
+    streakDays: entries.length,
+    weeklyMood: `Średnia ocena ${average.toFixed(1)}/5`,
+    moodLabel,
+    moodTrend: entries.slice(0, 7).map((entry) => Math.round(Number(entry.score) || 0)).reverse(),
+  }
+}
+
 export const AppDataProvider = ({ children }) => {
   const [activeMenu, setActiveMenu] = useState('dashboard')
   const [menuItems] = useState(defaultMenuItems)
   const [stats, setStats] = useState({
     streakDays: 0,
-    weeklyMood: 0,
+    weeklyMood: 'Ładowanie...',
     moodLabel: 'Ładowanie',
-    moodTrend: [80, 60, 70, 40, 30, 50, 20],
+    moodTrend: [],
   })
   const [recentEntries, setRecentEntries] = useState([])
   const [quickNote, setQuickNote] = useState('')
@@ -33,14 +87,11 @@ export const AppDataProvider = ({ children }) => {
       setError(null)
 
       try {
-        const [dashboardStats, entries] = await Promise.all([
-          fetchDashboardStats(),
-          fetchRecentEntries(),
-        ])
-
+        const history = await fetchHistory()
         if (!active) return
-        setStats(dashboardStats)
-        setRecentEntries(entries)
+        const normalized = normalizeHistory(history)
+        setRecentEntries(normalized)
+        setStats(computeStats(normalized))
       } catch (err) {
         if (!active) return
         setError(err)
@@ -62,17 +113,19 @@ export const AppDataProvider = ({ children }) => {
     setError(null)
 
     try {
-      const savedNote = await submitQuickNote(quickNote)
-      setRecentEntries((prev) => [savedNote, ...prev])
+      const saved = await analyzeNote(quickNote)
+      const normalized = normalizeEntry(saved, quickNote)
+      setRecentEntries((prev) => [normalized, ...prev])
+      setStats(computeStats([normalized, ...recentEntries]))
       setQuickNote('')
-      return savedNote
+      return normalized
     } catch (err) {
       setError(err)
       throw err
     } finally {
       setIsSavingNote(false)
     }
-  }, [quickNote])
+  }, [quickNote, recentEntries])
 
   const value = useMemo(
     () => ({
