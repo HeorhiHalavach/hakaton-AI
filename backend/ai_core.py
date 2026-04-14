@@ -10,9 +10,6 @@ anonymizer = DataAnonymizer()
 
 nlp_model = pipeline("sentiment-analysis", model="bardsai/twitter-sentiment-pl-base", top_k=None)
 
-
-
-
 def get_fluid_score(text):
     sentences = re.split(r'(?<=[.!?,])\s+', text.strip())
     if not sentences: sentences = [text]
