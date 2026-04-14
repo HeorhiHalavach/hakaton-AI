@@ -26,7 +26,7 @@ class DiaryEntry(BaseModel):
 async def analyze_text(entry: DiaryEntry, db: Session = Depends(get_db)):
     try:
         result = process_user_note(entry.text)
- 
+
         new_entry = DiaryEntryDB(
             og_text=entry.text,
             score=result["score"],
@@ -53,7 +53,7 @@ async def get_history(db: Session = Depends(get_db)):
         history = [{
             "id": e.id,
             "date": e.timestamp,
-            "og_text": e.original_text,
+            "og_text": e.og_text,
             "score": e.score,
             "response": e.response
         } for e in entries]
