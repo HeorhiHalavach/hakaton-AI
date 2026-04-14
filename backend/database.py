@@ -11,7 +11,7 @@ Base = declarative_base()
 class DiaryEntryDB(Base):
     __tablename__ = "diary_entries"
     id = Column(Integer, primary_key=True)
-    timestamp = Column(DateTime, default=datetime.now(ZoneInfo('UTC')))
+    timestamp = Column(DateTime, default=lambda: datetime.now(ZoneInfo('UTC')))
     og_text = Column(String)
     score = Column(Float)
     response = Column(String)
