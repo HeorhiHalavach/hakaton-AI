@@ -19,6 +19,7 @@ async function request(endpoint, options = {}) {
 
 export async function fetchHistory() {
   const result = await request('/api/history')
+  console.log('Fetched history:', result)
   return result.data ?? result
 }
 

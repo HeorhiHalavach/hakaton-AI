@@ -53,7 +53,7 @@ export const Journal = () => {
                 <p className={`text-sm whitespace-pre-line ${isDark ? 'text-gray-300' : 'text-[#6e5644]'}`}>{entry.text}</p>
                 {entry.response && (
                   <div className={`mt-4 rounded-2xl p-4 ${isDark ? 'bg-[#2d2544]/80 border border-purple-500/20' : 'bg-[#f1e2d0] border border-[#d3b89a]'}`}>
-                    <p className={`text-xs uppercase tracking-widest mb-2 ${isDark ? 'text-[#9f7aea]' : 'text-[#a66f3a]'}`}>Odpowiedź backendu</p>
+                    <p className={`text-xs uppercase tracking-widest mb-2 ${isDark ? 'text-[#9f7aea]' : 'text-[#a66f3a]'}`}>Odpowiedź</p>
                     <p className={`text-sm whitespace-pre-line ${isDark ? 'text-gray-200' : 'text-[#5f4b3a]'}`}>{entry.response}</p>
                   </div>
                 )}

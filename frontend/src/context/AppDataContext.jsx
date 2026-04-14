@@ -22,11 +22,38 @@ const formatDate = (value) => {
   })
 }
 
+const sanitizeResponse = (response = '') => {
+  if (typeof response !== 'string') return ''
+  let text = response.trim()
+
+  const prefixes = [
+    'Odpowiedź asystenta:',
+    'Odpowiedź backendu:',
+    'Odpowiedź:',
+    'Response:',
+    'Assistant response:',
+    'Ответ ассистента:',
+  ]
+
+  for (const prefix of prefixes) {
+    text = text.replace(new RegExp(`^${prefix.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\s*`, 'i'), '')
+  }
+
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line && !/^(еще|Ещё|Odpowiedź|Answer|Assistant|Response|Ответ)\b/i.test(line) && !/^[\*\-–•\s]+$/.test(line))
+
+  text = lines.join('\n')
+  text = text.replace(/^[\*\s]+|[\*\s]+$/g, '').replace(/\s{2,}/g, ' ')
+  return text.trim()
+}
+
 const normalizeEntry = (entry, fallbackText = '') => {
   const text = entry.og_text || entry.original_text || entry.text || fallbackText || ''
   const date = entry.date || entry.timestamp || new Date().toISOString()
   const score = typeof entry.score === 'number' ? entry.score : parseFloat(entry.score) || 0
-  const response = entry.response || ''
+  const response = sanitizeResponse(entry.response || '')
 
   return {
     id: entry.id ?? `${Date.now()}`,
