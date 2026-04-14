@@ -118,6 +118,7 @@ async def get_monthly_statistics(db: Session = Depends(get_db)):
             "data": chart_data
         }
     except Exception as e:
+        return {"status" : "error", "message" : str(e)}
 @app.delete("/api/clear")
 async def clear_database(db: Session = Depends(get_db)):
     try:
