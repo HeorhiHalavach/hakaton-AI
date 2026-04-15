@@ -115,17 +115,15 @@ export const AppDataProvider = ({ children }) => {
   const [weeklyStats, setWeeklyStats] = useState([])
   const [monthlyStats, setMonthlyStats] = useState([])
   const [quickNote, setQuickNote] = useState('')
-  const [theme, setTheme] = useState('dark')
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.localStorage.getItem('theme') || 'dark'
+    }
+    return 'dark'
+  })
   const [isLoading, setIsLoading] = useState(true)
   const [isSavingNote, setIsSavingNote] = useState(false)
   const [error, setError] = useState(null)
-
-  useEffect(() => {
-    const savedTheme = window.localStorage.getItem('theme')
-    if (savedTheme) {
-      setTheme(savedTheme)
-    }
-  }, [])
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
