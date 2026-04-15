@@ -1,17 +1,100 @@
-# React + Vite
+# Frontend aplikacji
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+To jest frontendowa część aplikacji React + Vite, obsługująca interfejs użytkownika, dziennik, analizy nastroju oraz audio.
 
-Currently, two official plugins are available:
+## Co jest w projekcie
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19 + Vite
+- Tailwind CSS dla stylów
+- kontekst aplikacji do zarządzania stanem (`src/context/AppDataContext.jsx`)
+- api do komunikacji z backendem (`src/api/appApi.js`)
+- zapisywanie `user_id` w `localStorage` dla unikalnego użytkownika
+- responsywny dashboard, ciemny/jasny motyw i sekcja `Journal`
 
-## React Compiler
+## Uruchomienie
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Przejdź do katalogu `frontend`
+2. Zainstaluj zależności:
 
-## Expanding the ESLint configuration
+```bash
+npm install
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-віфвфів
+3. Uruchom tryb deweloperski:
+
+```bash
+npm run dev
+```
+
+## Budowanie produkcyjne
+
+```bash
+npm run build
+```
+
+## Lint
+
+```bash
+npm run lint
+```
+
+## Konfiguracja API
+
+Adres backendu możesz ustawić w pliku `.env` w katalogu `frontend` poprzez zmienną:
+
+```env
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+Backend oczekuje teraz:
+
+- `GET /api/history?user_id=...`
+- `GET /api/statistics/weekly?user_id=...`
+- `GET /api/statistics/monthly?user_id=...`
+- `POST /api/analyze` z ciałem `{ user_id, text }`
+- `POST /api/speak` zwracającym plik audio
+
+## Działanie `user_id`
+
+Przy pierwszym uruchomieniu aplikacji generowany jest `diary_uid` i zapisywany w `localStorage`. Dzięki temu każdy użytkownik ma swoje dane osobne, a przy zmianie `localStorage.removeItem('diary_uid')` można przetestować nowego użytkownika.
+
+## Główne pliki
+
+- `src/App.jsx` — punkt wejścia aplikacji
+- `src/context/AppDataContext.jsx` — logika stanu aplikacji i ładowanie danych
+- `src/api/appApi.js` — wywołania API i logika requestów
+- `src/components/Dashboard.jsx` — główny układ dashboardu
+- `src/components/Journal.jsx` — obsługa dziennika i przycisków audio
+- `src/components/StartDisplay.jsx` — ekran startowy przy ładowaniu
+
+## Wsparcie tematu
+
+Aplikacja ma tryb ciemny i jasny, ustawiony w `localStorage` pod kluczem `theme`. Dzięki temu preferencja użytkownika zostaje zapamiętana.
+
+## Opis ekranów
+
+- `Dashboard` — główny widok z podsumowaniem nastroju, liczbą notatek i ostatnimi wpisami. Tutaj widoczne są metryki takie jak „Dni z rzędu”, „Średni nastrój” oraz trend nastroju.
+- `Journal` — formularz zapisu notatki oraz lista ostatnich wpisów. Przy każdym wpisie wyświetlana jest też odpowiedź AI, którą można odsłuchać.
+- `Settings` — przełącznik motywu między `dark` a `light`.
+- ekran startowy — animowany ekran ładowania, który wyświetla się na początku uruchomienia aplikacji.
+
+## Jak działa odtwarzanie audio
+
+- Kliknięcie `Odtwórz` wysyła tekst odpowiedzi na endpoint `POST /api/speak`.
+- Backend zwraca plik audio jako `Blob`.
+- Frontend tworzy `ObjectURL` i uruchamia element `Audio`.
+- Przy odtworzeniu nowego nagrania poprzedni dźwięk jest zatrzymywany.
+
+## Testowanie nowego użytkownika
+
+Aby sprawdzić zachowanie jako nowy użytkownik, otwórz narzędzia deweloperskie w przeglądarce i wykonaj:
+
+```js
+localStorage.removeItem('diary_uid')
+```
+
+Następnie odśwież stronę. Aplikacja wygeneruje nowy identyfikator i załaduje dane dla „czystego” użytkownika.
+
+## Uwagi
+
+Plik `frontend/README.md` opisuje tylko frontend, więc jeśli potrzebujesz dokumentację backendu, sprawdź katalog `backend` lub główny README repozytorium.
