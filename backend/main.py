@@ -118,4 +118,13 @@ async def get_monthly_statistics(db: Session = Depends(get_db)):
             "data": chart_data
         }
     except Exception as e:
+        return {"status" : "error", "message" : str(e)}
+@app.delete("/api/clear")
+async def clear_database(db: Session = Depends(get_db)):
+    try:
+        db.query(DiaryEntryDB).delete()
+        db.commit()
+        return {"status": "success", "message": "Baza została wyczyszczona!"}
+    except Exception as e:
+        db.rollback()
         return {"status": "error", "message": str(e)}
