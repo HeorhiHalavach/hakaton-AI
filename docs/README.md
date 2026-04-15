@@ -1,63 +1,143 @@
-# Architektura Systemu i Specyfikacja Techniczna
+﻿# Aplikacja Nawigator Umysłu
 
-## 1. Wykorzystane Modele AI
-
-System wykorzystuje hybrydową architekturę przetwarzania języka naturalnego (NLP), łączącą wyspecjalizowane modele lokalne z zaawansowanym modelem generatywnym.
-
-### Bielik 11B V3.0 (API)
-* **Typ:** Wielkogabarytowy model językowy (LLM) udostępniany przez API Organizatora.
-* **Zastosowanie:** Generowanie kontekstowych, empatycznych odpowiedzi na podstawie analizy nastroju użytkownika.
-* **Integracja:** Komunikacja odbywa się za pośrednictwem klienta OpenAI z wykorzystaniem dedykowanego adresu URL oraz klucza dostępu.
-
-### bardsai/twitter-sentiment-pl-base (Lokalny)
-* **Typ:** Model typu Transformer (architektura BERT) wyspecjalizowany w analizie sentymentu języka polskiego.
-* **Zastosowanie:** Wyliczanie precyzyjnego wskaźnika nastroju (score) w skali 1.0 - 5.0 dla każdej przesłanej notatki.
-* **Implementacja:** Wykorzystuje bibliotekę HuggingFace Transformers do lokalnego przetwarzania tekstu.
-
-### pl_core_news_md (Lokalny)
-* **Typ:** Model statystyczny NLP dla języka polskiego biblioteki spaCy.
-* **Zastosowanie:** Rozpoznawanie encji nazwanych (NER) w celu identyfikacji danych wrażliwych takich jak imiona, nazwiska oraz lokalizacje geograficzne.
+Pełny stos aplikacji: frontend React + Vite oraz backend FastAPI.
+Aplikacja pozwala na zapis nastroju, analizę wpisów przez AI, historię notatek, raporty tygodniowe i miesięczne oraz odtwarzanie odpowiedzi jako dźwięk.
 
 ---
 
-## 2. Biblioteki i Technologie
+## 🏗️ Architektura systemu
 
-### Framework i API
-* **FastAPI:** Asynchroniczny framework webowy służący do obsługi żądań HTTP i budowy punktów końcowych.
-* **Uvicorn:** Serwer ASGI wykorzystywany do uruchamiania aplikacji.
-* **Pydantic:** Walidacja struktur danych wejściowych i wyjściowych (modele DiaryEntry).
-
-### Baza Danych i Persystencja
-* **SQLAlchemy:** System ORM do zarządzania relacyjną bazą danych.
-* **SQLite:** Lokalna baza danych (plik `diary.db`) przechowująca historię wpisów, wyniki analizy oraz odpowiedzi AI.
-
-### Narzędzia Deweloperskie
-* **Pytest:** Framework do automatyzacji testów jednostkowych i integracyjnych.
-* **Python-dotenv:** Zarządzanie konfiguracją i kluczami API poprzez pliki środowiskowe.
+- Backend oparty na FastAPI.
+- Baza danych SQLite zarządzana przez SQLAlchemy (`backend/database.py`).
+- Moduł anonimizacji danych wrażliwych: `backend/anonymizer.py`.
+- Model AI do analizy nastroju i generowania odpowiedzi:
+  - lokalny pipeline sentiment-analysis od Hugging Face z modelem `bardsai/twitter-sentiment-pl-base`.
+  - zewnętrzne zapytania do modelu `bielik` przez klienta OpenAI w `backend/ai_core.py`.
+- Frontend React/Vite z Tailwind CSS i kontekstem stanu w `frontend/src/context/AppDataContext.jsx`.
 
 ---
 
-## 3. Schemat Przepływu Danych (Data Flow)
+## 🔧 Struktura repozytorium
 
-Proces przetwarzania notatki użytkownika w punkcie końcowym `/api/analyze` przebiega według następującej sekwencji:
-
-1. **Walidacja wejścia:** Serwer odbiera żądanie POST i weryfikuje poprawność formatu JSON przy użyciu modelu Pydantic.
-2. **Anonimizacja (PII Redaction):**
-   * Tekst trafia do modułu `DataAnonymizer`.
-   * Wyrażenia regularne usuwają adresy e-mail oraz numery telefonów.
-   * Model NER spaCy identyfikuje i maskuje imiona oraz miejsca, zastępując je tagami (np. `<OSOBA>`, `<MIEJSCE>`).
-3. **Obliczanie wskaźnika nastroju:**
-   * Zanonimizowany tekst jest dzielony na zdania.
-   * Model sentymentu analizuje każde zdanie, a system wylicza średnią ważoną (Mood Score).
-4. **Generowanie odpowiedzi AI:**
-   * Oczyszczony tekst wraz z wyliczonym wynikiem nastroju jest przesyłany do modelu Bielik 11B.
-   * System stosuje instrukcje systemowe (Prompt Engineering) w celu uzyskania krótkiej, empatycznej porady w języku polskim.
-5. **Persystencja danych:** Oryginalny tekst, wynik punktowy oraz odpowiedź asystenta są zapisywane w bazie danych SQLite.
-6. **Odpowiedź systemu:** Klient otrzymuje ustrukturyzowany obiekt JSON zawierający status operacji, wynik analizy oraz treść odpowiedzi AI.
+- `frontend/` — React + Vite, Tailwind CSS, logika UI i komunikacja z backendem.
+- `backend/` — FastAPI, baza danych SQLAlchemy, przetwarzanie wpisów i TTS audio.
+- `MAIN_TASK.md` — główne zadanie hackathonowe.
+- `examples/` — przykładowe fragmenty kodu lub wykorzystania.
 
 ---
 
-## 4. Bezpieczeństwo i Walidacja
+## 🚀 Uruchomienie projektu
+
+### Frontend
+
+1. Przejdź do katalogu `frontend`:
+
+```bash
+cd frontend
+```
+
+2. Zainstaluj zależności:
+
+```bash
+npm install
+```
+
+3. Uruchom wersję deweloperską:
+
+```bash
+npm run dev
+```
+
+4. Budowanie produkcyjne:
+
+```bash
+npm run build
+```
+
+5. Sprawdzanie lintera:
+
+```bash
+npm run lint
+```
+
+6. Konfiguracja backendu:
+
+Ustaw `VITE_API_BASE_URL` w pliku `frontend/.env`, np.:
+
+```env
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+### Backend
+
+1. Przejdź do katalogu `backend`:
+
+```bash
+cd backend
+```
+
+2. Utwórz wirtualne środowisko (opcjonalnie):
+
+Windows:
+```bash
+python -m venv .venv
+.\.venv\Scripts\activate
+```
+Linux / macOS:
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+3. Zainstaluj zależności:
+
+```bash
+python -m pip install fastapi uvicorn sqlalchemy edge-tts pydantic
+```
+
+4. Uruchom serwer:
+
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+---
+
+## 📌 Główne funkcje
+
+- Analiza nastroju wpisów użytkownika.
+- Historia notatek z AI-odpowiedziami.
+- Raporty statystyczne:
+  - `GET /api/statistics/weekly`
+  - `GET /api/statistics/monthly`
+- Odtwarzanie odpowiedzi głosowej za pomocą TTS (`POST /api/speak`).
+- Przechowywanie identyfikatora użytkownika w `localStorage`.
+- Tryb jasny / ciemny oraz responsywny interfejs.
+
+---
+
+## 🧠 Backend API
+
+Backend obsługuje następujące endpointy:
+
+- `POST /api/analyze`
+  - Request: `{ user_id, text }`
+  - Analizuje wpis i zapisuje go w bazie.
+- `GET /api/history?user_id=<id>`
+  - Pobiera historię notatek dla konkretnego użytkownika.
+- `GET /api/statistics/weekly?user_id=<id>`
+  - Pobiera listę wpisów z ostatnich 7 dni.
+- `GET /api/statistics/monthly?user_id=<id>`
+  - Pobiera dane z ostatnich 30 dni.
+- `POST /api/speak`
+  - Request: `{ text }`
+  - Zwraca plik audio MP3 wygenerowany przez `edge_tts`.
+- `DELETE /api/clear`
+  - Czyści wszystkie wpisy w bazie (przydatne w testach / dewelopmencie).
+
+---
+
+## Bezpieczeństwo i Walidacja
 
 System został zaprojektowany z rygorystycznym podejściem do higieny danych (Data Hygiene) oraz ochrony prywatności użytkowników, wykorzystując wielowarstwowe mechanizmy zabezpieczeń.
 
@@ -75,97 +155,60 @@ Zanim jakiekolwiek dane tekstowe zostaną przesłane do zewnętrznego API modelu
 * **Bezpieczeństwo zapytań SQL:** Komunikacja z bazą danych SQLite odbywa się wyłącznie za pośrednictwem warstwy abstrakcji ORM (SQLAlchemy). Dzięki temu zapytania są parametryzowane, co natywnie chroni system przed atakami typu SQL Injection.
 * **Kontrolowane wyjątki:** Wszystkie punkty końcowe API są zabezpieczone blokami `try-except`. W przypadku wystąpienia nieoczekiwanego błędu po stronie serwera lub modeli AI, system przechwytuje wyjątek i zwraca ustandaryzowaną odpowiedź JSON `{"status": "error", "message": "..."}`, zapobiegając w ten sposób wyciekom śladów stosu (stack traces) do klienta.
 
----
+## 📁 Kluczowe pliki
 
-## 5. Testy i Walidacja Logiki Biznesowej
+### Frontend
 
-W celu zagwarantowania niezawodności i poprawności działania systemu, projekt zawiera kompleksowy zestaw testów automatycznych, podzielony na testy jednostkowe potoku NLP oraz testy integracyjne API.
+- `frontend/src/App.jsx` — główny punkt wejścia aplikacji.
+- `frontend/src/context/AppDataContext.jsx` — zarządzanie stanem aplikacji, ładowanie historii i statystyk.
+- `frontend/src/api/appApi.js` — wywołania API i dodawanie `user_id` do żądań.
+- `frontend/src/components/Dashboard.jsx` — widok dashboardu i statystyk.
+- `frontend/src/components/Journal.jsx` — formularz wpisu, lista notatek oraz przycisk audio.
+- `frontend/src/components/StartDisplay.jsx` — ekran startowy i animowany wstęp.
 
-### Testy Potoku Przetwarzania (Pipeline Tests)
-Plik `tests.py` realizuje testy jednostkowe kluczowych komponentów biznesowych w izolacji od warstwy sieciowej (FastAPI).
-* **Weryfikacja Anonimizacji:** Skrypt testuje różnorodne przypadki brzegowe (edge cases), wprowadzając celowo do systemu dane wrażliwe (np. imię "Anna", polski numer telefonu "+48795610431"). Następnie waliduje, czy w oczyszczonym tekście nie doszło do wycieku (PII Leak) przed przekazaniem danych do wyceny sentymentu.
-* **Weryfikacja Sentymentu:** Skrypt przetwarza zdania o skrajnym ładunku emocjonalnym (pozytywne, negatywne, neutralne) w celu potwierdzenia, czy funkcja `get_fluid_score` poprawnie mapuje wyniki na oczekiwaną skalę 1.0 - 5.0.
+### Backend
 
-### Testy Integracyjne API (Integration Tests)
-Plik `test_api.py` zawiera zestaw testów integracyjnych opartych na frameworku `pytest` oraz narzędziu `TestClient` z biblioteki FastAPI.
-* **Izolacja Środowiska (In-Memory DB):** Do celów testowych system wykorzystuje ulotną bazę danych w pamięci RAM (`sqlite:///:memory:`) ze wsparciem klasy `StaticPool`. Gwarantuje to, że uruchomienie testów nie nadpisuje i nie modyfikuje rzeczywistej bazy danych `diary.db`, a sesja jest współdzielona na czas trwania testu.
-* **Mockowanie Zewnętrznych Zależności:** Aby wyeliminować opóźnienia sieciowe i koszty odpytywania zewnętrznego API (Bielik 11B), wywołania sztucznej inteligencji zostały zablokowane i zastąpione makietą przy użyciu dekoratora `@patch("main.process_user_note")` z biblioteki `unittest.mock`.
-* **Scenariusze Testowe:**
-  * `test_analyze_endpoint_success`: Weryfikacja poprawnego kodu odpowiedzi 200, struktury JSON oraz poprawnego zapisu do bazy.
-  * `test_analyze_endpoint_empty_text` oraz `test_analyze_endpoint_symbols`: Badanie odporności punktu końcowego na anomalię wejściową (pusty ciąg znaków, wyłącznie znaki interpunkcyjne).
-  * `test_weekly_statistics_endpoint` oraz `test_monthly_statistics_endpoint`: Weryfikacja poprawnego działania algorytmów agregujących dane historyczne i obliczających różnice stref czasowych.
-
-### Instrukcja Uruchomienia Testów
-Aby zwalidować poprawność działania całej logiki biznesowej, należy w katalogu `backend/` uruchomić polecenie:
-```bash
-pytest test_api.py
-```
-Testy potoku NLP uruchamia się natywnym poleceniem:
-```bash
-python tests.py
-```
+- `backend/main.py` — serwer FastAPI i definicje endpointów.
+- `backend/ai_core.py` — logika analizy tekstu i generowania odpowiedzi AI.
+- `backend/database.py` — konfiguracja połączenia z bazą i model `DiaryEntryDB`.
 
 ---
 
-## 6. Instrukcja Uruchomienia Środowiska (Backend)
+## 🧩 Mechanizm `user_id`
 
-Poniższa instrukcja opisuje kroki niezbędne do poprawnego wdrożenia, konfiguracji i uruchomienia serwera aplikacji (backend) w środowisku lokalnym.
-
-### Wymagania Wstępne
-* Zainstalowany interpreter języka Python w wersji 3.10 lub nowszej (projekt zbudowany i testowany m.in. na środowisku 3.13).
-* Narzędzie do zarządzania pakietami `pip`.
-
-### Kroki Wdrożeniowe
-
-**1. Przejście do katalogu roboczego i inicjalizacja środowiska wirtualnego**
-Zaleca się ścisłą izolację zależności projektu. Przejdź do katalogu `backend/` i utwórz środowisko wirtualne (venv):
-
-```bash
-cd backend
-python -m venv .venv
-```
-
-Systemy Windows: 
-
-```bash
-.venv\Scripts\activate
-```
-
-Systemy Linux / macOS: 
-```bash
-source .venv/bin/activate
-```
-
-**2. Instalacja zależności pakietowych**
-Po aktywacji środowiska należy zainstalować wszystkie biblioteki wymagane do działania frameworka FastAPI, bazy danych oraz modeli sztucznej inteligencji:
-
-```bash
-pip install fastapi uvicorn pydantic sqlalchemy spacy openai transformers python-dotenv pytest httpx
-```
-
-**3. Pobranie lokalnych modeli NLP**
-Moduł anonimizacji (NER) wymaga pobrania polskiego modelu statystycznego dla biblioteki spaCy. Należy wykonać poniższe polecenie:
-
-```bash
-python -m spacy download pl_core_news_md
-```
-
-**4. Konfiguracja zmiennych środowiskowych**
-Do poprawnego połączenia z modelem Bielik 11B wymagana jest konfiguracja zmiennych środowiskowych. Wewnątrz katalogu backend/ upewnij się, że istnieje plik o nazwie .env. Plik ten musi zawierać klucze
-
-**5. Uruchomienie serwera aplikacji**
-Aplikacja jest obsługiwana przez serwer ASGI Uvicorn. Aby uruchomić backend w trybie deweloperskim z automatycznym przeładowaniem, należy wykonać komendę:
-
-```bash
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-**Weryfikacja działania**
-Po pomyślnym uruchomieniu procesu:
-
-### Serwer HTTP API będzie dostępny pod adresem: http://localhost:8000
-
-### Interaktywna dokumentacja techniczna OpenAPI (Swagger UI), pozwalająca na testowanie punktów końcowych, zostanie automatycznie wygenerowana i udostępniona pod adresem: http://localhost:8000/docs
+Frontend generuje unikalny identyfikator użytkownika i zapisuje go w `localStorage` pod kluczem `diary_uid`.
+Dzięki temu backend zapisuje osobne dane dla każdego użytkownika oraz ładuje jego historię i statystyki.
 
 ---
 
+## 🎧 Odtwarzanie audio
+
+- Frontend wysyła tekst z odpowiedzią AI do `/api/speak`.
+- Backend generuje plik MP3 przy użyciu `edge_tts`.
+- Frontend pobiera plik jako `Blob`, tworzy `ObjectURL` i odtwarza go w `Audio`.
+- Przy odtworzeniu nowego dźwięku poprzednie audio jest automatycznie zatrzymywane.
+
+---
+
+## 🧪 Testy
+
+- Plik `backend/tests.py` zawiera testy jednostkowe i integracyjne dla logiki backendu oraz punktów końcowych API.
+- Testy pokrywają podstawowe przypadki użycia, m.in.:
+  - analizę nowego wpisu,
+  - pobieranie historii użytkownika,
+  - wygenerowanie statystyk tygodniowych i miesięcznych.
+- Weryfikacja poprawności logiki biznesowej odbywa się poprzez symulację żądań HTTP i sprawdzenie odpowiedzi JSON.
+
+---
+
+## 📚 Dodatkowe informacje
+
+- `frontend/README.md` zawiera bardziej szczegółową dokumentację frontendową.
+- `MAIN_TASK.md` zawiera główne założenia hackathonowe i zadania zespołu.
+- `backend/` może wymagać dodatkowych bibliotek w zależności od środowiska systemowego.
+
+---
+
+## ✅ Notatka
+
+Zaktualizowano ten plik, aby zastąpić ogólny szablon hackathonowy rzeczywistą dokumentacją pełno-stackowego projektu.
