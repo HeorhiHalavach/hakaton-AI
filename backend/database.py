@@ -11,6 +11,7 @@ Base = declarative_base()
 class DiaryEntryDB(Base):
     __tablename__ = "diary_entries"
     id = Column(Integer, primary_key=True)
+    user_id = Column(String, index=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     og_text = Column(String)
     score = Column(Float)
