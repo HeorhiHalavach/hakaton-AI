@@ -60,4 +60,21 @@
   font-size: 0.9rem;
 }
 
+@media (max-width: 640px) {
+  .title {
+    font-size: 3rem;
+  }
+
+  .subtitle {
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+  }
+
+  .bg-glow {
+    width: 360px;
+    height: 360px;
+    filter: blur(60px);
+  }
+}
+
 

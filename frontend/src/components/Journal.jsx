@@ -1,9 +1,24 @@
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useAppData } from '../context/AppDataContext'
+import { speakText } from '../api/appApi'
 
 export const Journal = () => {
   const { quickNote, setQuickNote, saveNote, isSavingNote, recentEntries, error, theme } = useAppData()
+  const [playingId, setPlayingId] = useState(null)
+  const audioRef = useRef(null)
   const isDark = theme === 'dark'
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+        if (audioRef.current._objectUrl) {
+          window.URL.revokeObjectURL(audioRef.current._objectUrl)
+        }
+      }
+    }
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -53,8 +68,45 @@ export const Journal = () => {
                 <p className={`text-sm whitespace-pre-line ${isDark ? 'text-gray-300' : 'text-[#6e5644]'}`}>{entry.text}</p>
                 {entry.response && (
                   <div className={`mt-4 rounded-2xl p-4 ${isDark ? 'bg-[#2d2544]/80 border border-purple-500/20' : 'bg-[#f1e2d0] border border-[#d3b89a]'}`}>
-                    <p className={`text-xs uppercase tracking-widest mb-2 ${isDark ? 'text-[#9f7aea]' : 'text-[#a66f3a]'}`}>Odpowiedź</p>
-                    <p className={`text-sm whitespace-pre-line ${isDark ? 'text-gray-200' : 'text-[#5f4b3a]'}`}>{entry.response}</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <p className={`text-xs uppercase tracking-widest ${isDark ? 'text-[#9f7aea]' : 'text-[#a66f3a]'}`}>Odpowiedź</p>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (playingId === entry.id) return
+                          setPlayingId(entry.id)
+
+                          if (audioRef.current) {
+                            audioRef.current.pause()
+                            if (audioRef.current._objectUrl) {
+                              window.URL.revokeObjectURL(audioRef.current._objectUrl)
+                            }
+                          }
+
+                          try {
+                            const blob = await speakText(entry.response)
+                            const audioUrl = window.URL.createObjectURL(blob)
+                            const audio = new Audio(audioUrl)
+                            audioRef.current = audio
+                            audioRef.current._objectUrl = audioUrl
+
+                            audio.onended = () => {
+                              window.URL.revokeObjectURL(audioUrl)
+                              setPlayingId(null)
+                            }
+
+                            await audio.play()
+                          } catch (err) {
+                            console.error('Błąd odtwarzania:', err)
+                            setPlayingId(null)
+                          }
+                        }}
+                        className={`rounded-full px-3 py-2 text-xs font-semibold transition ${isDark ? 'bg-purple-600 text-white hover:bg-purple-500' : 'bg-[#b57a4b] text-white hover:bg-[#a36f44]'}`}
+                      >
+                        {playingId === entry.id ? 'Odtwarzanie...' : 'Odtwórz'}
+                      </button>
+                    </div>
+                    <p className={`mt-3 text-sm whitespace-pre-line ${isDark ? 'text-gray-200' : 'text-[#5f4b3a]'}`}>{entry.response}</p>
                   </div>
                 )}
               </div>

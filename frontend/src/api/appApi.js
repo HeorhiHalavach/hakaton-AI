@@ -63,3 +63,24 @@ export async function analyzeNote(text) {
     body: JSON.stringify({ user_id: userId, text }),
   })
 }
+
+export async function speakText(text) {
+  const url = `${API_BASE_URL}/api/speak`
+  console.log('Speak request:', { url, text })
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ text }),
+  })
+
+  if (!response.ok) {
+    const message = await response.text()
+    console.error('Speak response error:', { url, status: response.status, body: message })
+    throw new Error(`Ошибка при получении аудио (${response.status}): ${message}`)
+  }
+
+  return await response.blob()
+}

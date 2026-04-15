@@ -124,7 +124,9 @@ export const Dashboard = () => {
                     onClick={() => setTheme(option)}
                     className={`w-full rounded-2xl border p-4 text-left transition ${
                       theme === option
-                        ? 'border-[#b57a4b] bg-[#f5e5d4] text-[#7b5e45]'
+                        ? isDark
+                          ? 'border-purple-500/20 bg-[#120d28] text-white'
+                          : 'border-[#b57a4b] bg-[#f5e5d4] text-[#7b5e45]'
                         : isDark
                         ? 'border-purple-500/10 bg-[#0d0a15] text-gray-200 hover:bg-[#2d2647]'
                         : 'border-[#d3b89a] bg-[#f7e8d0] text-[#5f4b3a] hover:bg-[#f0ddc7]'
@@ -133,7 +135,7 @@ export const Dashboard = () => {
                     <div className="flex items-center justify-between gap-4">
                       <div>
                         <p className="font-semibold capitalize">{option} motyw</p>
-                        <p className="text-sm mt-1 text-gray-400">{option === 'dark' ? 'Ciemny wygląd' : 'Jasny wygląd'}</p>
+                        <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-[#7b6755]'}`}>{option === 'dark' ? 'Ciemny wygląd' : 'Jasny wygląd'}</p>
                       </div>
                       <span className="text-sm font-medium">{theme === option ? 'Wybrano' : 'Wybierz'}</span>
                     </div>
