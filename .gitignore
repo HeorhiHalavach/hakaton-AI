@@ -4,6 +4,7 @@
 .project
 .settings/
 bin/
+.venv
 
 # Build output
 build/
