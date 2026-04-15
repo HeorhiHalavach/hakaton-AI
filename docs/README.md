@@ -125,6 +125,24 @@ Backend obsługuje następujące endpointy:
 
 ---
 
+## Bezpieczeństwo i Walidacja
+
+System został zaprojektowany z rygorystycznym podejściem do higieny danych (Data Hygiene) oraz ochrony prywatności użytkowników, wykorzystując wielowarstwowe mechanizmy zabezpieczeń.
+
+### Identyfikacja i Usuwanie PII (Data Anonymization)
+Zanim jakiekolwiek dane tekstowe zostaną przesłane do zewnętrznego API modelu Bielik, przechodzą one przez rygorystyczny proces sanitaryzacji w module `DataAnonymizer`.
+* **Wzorcowe dopasowanie (Regex):** System wykorzystuje wyrażenia regularne do natychmiastowego wyłapywania i maskowania formatów takich jak adresy e-mail (zastępowane tagiem `<EMAIL>`) oraz numery telefonów, w tym kierunkowe +48 (zastępowane tagiem `<TELEFON>`).
+* **Rozpoznawanie Encji Nazwanych (NER):** Przy użyciu modelu `pl_core_news_md` biblioteki spaCy, system analizuje kontekst zdania w celu wykrycia imion i nazwisk (zastępowanych tagiem `<OSOBA>`) oraz nazw geograficznych i lokalizacji (zastępowanych tagiem `<MIEJSCE>`).
+* **Izolacja danych:** Wrażliwe dane osobowe nigdy nie opuszczają lokalnego serwera i nie są uwzględniane w logach przesyłanych do zewnętrznych dostawców LLM.
+
+### Walidacja Typów Wejściowych i Wykrywanie Anomalii
+* **Ścisłe schematy Pydantic:** Każde żądanie HTTP do punktu końcowego `/api/analyze` jest automatycznie walidowane przez framework FastAPI w oparciu o model danych `DiaryEntry`.
+* **Odrzucanie anomalii:** Jeśli ładunek (payload) żądania nie zawiera wymaganego pola tekstowego lub typ danych jest niezgodny (np. przesłano wartość pustą lub liczbową zamiast ciągu znaków), serwer automatycznie odrzuca zapytanie, zwracając błąd HTTP 422 (Unprocessable Entity). Zapobiega to wprowadzaniu tzw. brudnych danych (data hygiene) do potoku analizy.
+
+### Obsługa Błędów i Ochrona Infrastruktury
+* **Bezpieczeństwo zapytań SQL:** Komunikacja z bazą danych SQLite odbywa się wyłącznie za pośrednictwem warstwy abstrakcji ORM (SQLAlchemy). Dzięki temu zapytania są parametryzowane, co natywnie chroni system przed atakami typu SQL Injection.
+* **Kontrolowane wyjątki:** Wszystkie punkty końcowe API są zabezpieczone blokami `try-except`. W przypadku wystąpienia nieoczekiwanego błędu po stronie serwera lub modeli AI, system przechwytuje wyjątek i zwraca ustandaryzowaną odpowiedź JSON `{"status": "error", "message": "..."}`, zapobiegając w ten sposób wyciekom śladów stosu (stack traces) do klienta.
+
 ## 📁 Kluczowe pliki
 
 ### Frontend

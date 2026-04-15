@@ -58,14 +58,14 @@ Wszystkie materiały dokumentacyjne muszą zostać umieszczone w katalogu **`/do
 #### **📄 III. Dokumentacja API (`/docs/openapi.yaml` lub `.json`)**
 * Pełna specyfikacja wszystkich punktów końcowych (endpoints) systemu w standardzie **OpenAPI / Swagger**.
 
-#### **🧪 IV. Dokumentacja techniczna (`/docs/README.md`)**
-Osobny plik dokumentacji (niezależny od głównego README projektu), zawierający:
-* **Architekturę systemu:** Wykaz wykorzystanych modeli AI (lokalnych/API), bibliotek oraz schemat przepływu danych.
-* **Instrukcję uruchomienia:** Precyzyjne kroki niezbędne do postawienia środowiska i obsługi zależności.
-* **Bezpieczeństwo i Walidacja:** Opis mechanizmów ochrony danych (walidacja typów wejściowych, wykrywanie anomalii, redakcja PII).
-* **Testy:** Dokumentacja przeprowadzonych testów jednostkowych lub integracyjnych potwierdzających poprawność logiki biznesowej.
+        #### **🧪 IV. Dokumentacja techniczna (`/docs/README.md`)**
+        Osobny plik dokumentacji (niezależny od głównego README projektu), zawierający:
+        * **Architekturę systemu:** Wykaz wykorzystanych modeli AI (lokalnych/API), bibliotek oraz schemat przepływu danych.
+        * **Instrukcję uruchomienia:** Precyzyjne kroki niezbędne do postawienia środowiska i obsługi zależności.
+        * **Bezpieczeństwo i Walidacja:** Opis mechanizmów ochrony danych (walidacja typów wejściowych, wykrywanie anomalii, redakcja PII).
+        * **Testy:** Dokumentacja przeprowadzonych testów jednostkowych lub integracyjnych potwierdzających poprawność logiki biznesowej.
 
----
+        ---
 
 ## 🐳 4. Nice to have: Konteneryzacja
 Możliwość uruchomienia całego stacku technologicznego (Frontend, Backend, AI Gateway) jedną komendą:
