@@ -5,6 +5,18 @@ Aplikacja pozwala na zapis nastroju, analizę wpisów przez AI, historię notate
 
 ---
 
+## 🏗️ Architektura systemu
+
+- Backend oparty na FastAPI.
+- Baza danych SQLite zarządzana przez SQLAlchemy (`backend/database.py`).
+- Moduł anonimizacji danych wrażliwych: `backend/anonymizer.py`.
+- Model AI do analizy nastroju i generowania odpowiedzi:
+  - lokalny pipeline sentiment-analysis od Hugging Face z modelem `bardsai/twitter-sentiment-pl-base`.
+  - zewnętrzne zapytania do modelu `bielik` przez klienta OpenAI w `backend/ai_core.py`.
+- Frontend React/Vite z Tailwind CSS i kontekstem stanu w `frontend/src/context/AppDataContext.jsx`.
+
+---
+
 ## 🔧 Struktura repozytorium
 
 - `frontend/` — React + Vite, Tailwind CSS, logika UI i komunikacja z backendem.
@@ -175,6 +187,17 @@ Dzięki temu backend zapisuje osobne dane dla każdego użytkownika oraz ładuje
 - Backend generuje plik MP3 przy użyciu `edge_tts`.
 - Frontend pobiera plik jako `Blob`, tworzy `ObjectURL` i odtwarza go w `Audio`.
 - Przy odtworzeniu nowego dźwięku poprzednie audio jest automatycznie zatrzymywane.
+
+---
+
+## 🧪 Testy
+
+- Plik `backend/tests.py` zawiera testy jednostkowe i integracyjne dla logiki backendu oraz punktów końcowych API.
+- Testy pokrywają podstawowe przypadki użycia, m.in.:
+  - analizę nowego wpisu,
+  - pobieranie historii użytkownika,
+  - wygenerowanie statystyk tygodniowych i miesięcznych.
+- Weryfikacja poprawności logiki biznesowej odbywa się poprzez symulację żądań HTTP i sprawdzenie odpowiedzi JSON.
 
 ---
 

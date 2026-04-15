@@ -1,0 +1,236 @@
+openapi: 3.0.3
+info:
+  title: Mood Diary / AI Journal API
+  version: 1.0.0
+  description: API dla aplikacji Mood Diary / AI Journal - analiza nastroju, historia notatek, statystyki oraz TTS audio.
+servers:
+  - url: http://localhost:8000
+    description: Lokalne środowisko deweloperskie
+paths:
+  /api/analyze:
+    post:
+      summary: Analiza nowej notatki użytkownika
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeRequest'
+      responses:
+        '200':
+          description: Wynik analizy tekstu
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeResponse'
+        '422':
+          description: Nieprawidłowe dane wejściowe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/history:
+    get:
+      summary: Pobierz historię notatek użytkownika
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: string
+          required: true
+          description: Identyfikator użytkownika
+      responses:
+        '200':
+          description: Lista wpisów w historii
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryResponse'
+        '422':
+          description: Brakujący lub nieprawidłowy parametr user_id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/statistics/weekly:
+    get:
+      summary: Pobierz dane statystyczne z ostatnich 7 dni
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: string
+          required: true
+          description: Identyfikator użytkownika
+      responses:
+        '200':
+          description: Dane statystyk tygodniowych
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsResponse'
+  /api/statistics/monthly:
+    get:
+      summary: Pobierz dane statystyczne z ostatnich 30 dni
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: string
+          required: true
+          description: Identyfikator użytkownika
+      responses:
+        '200':
+          description: Dane statystyk miesięcznych
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsResponse'
+  /api/speak:
+    post:
+      summary: Wygeneruj nagranie audio na podstawie tekstu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TTSRequest'
+      responses:
+        '200':
+          description: Plik audio MP3
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        '422':
+          description: Nieprawidłowe dane wejściowe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/clear:
+    delete:
+      summary: Usuń wszystkie wpisy z bazy (tryb deweloperski)
+      responses:
+        '200':
+          description: Operacja zakończona sukcesem
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+components:
+  schemas:
+    AnalyzeRequest:
+      type: object
+      required:
+        - user_id
+        - text
+      properties:
+        user_id:
+          type: string
+          example: a1b2c3d4
+        text:
+          type: string
+          example: "Dzisiaj czułem się trochę przytłoczony pracą..."
+    AnalyzeResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        score:
+          type: number
+          format: float
+          example: 3.75
+        response:
+          type: string
+          example: "Świetnie, że podzieliłeś się swoimi odczuciami. Warto dać sobie dziś chwilę odpoczynku."
+    DiaryEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        date:
+          type: string
+          format: date-time
+          example: "2026-04-15T10:00:00Z"
+        og_text:
+          type: string
+          example: "Dziś miałem trudny dzień w pracy..."
+        score:
+          type: number
+          format: float
+          example: 4.2
+        response:
+          type: string
+          example: "Dobrze, że dzielisz się tym. Staraj się skupić na małych krokach."
+    HistoryResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiaryEntry'
+    StatisticsItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-04-14T08:30:00Z"
+        label:
+          type: string
+          example: "14.04 08:30"
+        score:
+          type: number
+          format: float
+          example: 3.8
+        og_text:
+          type: string
+          example: "Rano było lepiej niż wieczorem."
+        ai_response:
+          type: string
+          example: "To normalne mieć zmienne dni. Zadbaj dziś o siebie."
+    StatisticsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        count:
+          type: integer
+          example: 5
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatisticsItem'
+    TTSRequest:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          example: "Powiedz mi, że dam radę."
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        message:
+          type: string
+          example: "Nieprawidłowe żądanie."
