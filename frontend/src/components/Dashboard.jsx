@@ -1,9 +1,10 @@
 ﻿import React from 'react';
 import { useAppData } from '../context/AppDataContext';
 import { Journal } from './Journal';
+import { StatisticsPanel } from './StatisticsPanel';
 
 export const Dashboard = () => {
-  const { menuItems, activeMenu, setActiveMenu, stats, recentEntries, error, theme, setTheme } = useAppData();
+  const { menuItems, activeMenu, setActiveMenu, stats, recentEntries, weeklyStats, monthlyStats, error, theme, setTheme } = useAppData();
   const isDark = theme === 'dark'
 
   return (
@@ -89,7 +90,27 @@ export const Dashboard = () => {
           ) : activeMenu === 'analytics' ? (
             <div className={`rounded-2xl border p-5 shadow-lg ${isDark ? 'border-purple-500/20 bg-[#1e1a38]/60' : 'border-[#dbc3a2] bg-[#f8eee0]'}`}>
               <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-[#5f4b3a]'}`}>Analiza AI</h3>
-              <p className={`${isDark ? 'text-gray-400' : 'text-[#7b6755]'} mt-2`}>Analiza.</p>
+              <p className={`${isDark ? 'text-gray-400' : 'text-[#7b6755]'} mt-2 mb-6`}>Tu zobaczysz aktualny trend nastroju na podstawie ostatnich notatek.</p>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className={`rounded-2xl border p-4 ${isDark ? 'border-purple-500/20 bg-[#15142b]' : 'border-[#d9c6ac] bg-[#f5e8da]'}`}>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#7b6755]'} mb-2`}>Średni nastrój</p>
+                  <p className={`text-2xl font-bold ${isDark ? 'text-[#fbbf24]' : 'text-[#a66f3a]'}`}>{stats.moodLabel}</p>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#7b6755]'}`}>{stats.weeklyMood}</p>
+                </div>
+
+                <div className={`rounded-2xl border p-4 ${isDark ? 'border-purple-500/20 bg-[#15142b]' : 'border-[#d9c6ac] bg-[#f5e8da]'}`}>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#7b6755]'} mb-2`}>Wpisów w tygodniu</p>
+                  <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-[#5f4b3a]'}`}>{weeklyStats.length}</p>
+                </div>
+
+                <div className={`rounded-2xl border p-4 ${isDark ? 'border-purple-500/20 bg-[#15142b]' : 'border-[#d9c6ac] bg-[#f5e8da]'}`}>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-[#7b6755]'} mb-2`}>Wpisów w miesiącu</p>
+                  <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-[#5f4b3a]'}`}>{monthlyStats.length}</p>
+                </div>
+              </div>
+
+              <StatisticsPanel stats={stats} isDark={isDark} />
             </div>
           ) : activeMenu === 'settings' ? (
             <div className={`rounded-2xl border p-5 shadow-lg ${isDark ? 'border-purple-500/20 bg-[#1e1a38]/60' : 'border-[#dbc3a2] bg-[#f8eee0]'}`}>

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
-import { fetchHistory, analyzeNote } from '../api/appApi'
+import { fetchHistory, fetchWeeklyStatistics, fetchMonthlyStatistics, analyzeNote } from '../api/appApi'
 
 const AppDataContext = createContext(null)
 
@@ -36,16 +36,16 @@ const sanitizeResponse = (response = '') => {
   ]
 
   for (const prefix of prefixes) {
-    text = text.replace(new RegExp(`^${prefix.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\s*`, 'i'), '')
+    text = text.replace(new RegExp(`^${prefix.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\s*`, 'i'), '')
   }
 
   const lines = text
     .split(/\r?\n/)
     .map((line) => line.trim())
-    .filter((line) => line && !/^(еще|Ещё|Odpowiedź|Answer|Assistant|Response|Ответ)\b/i.test(line) && !/^[\*\-–•\s]+$/.test(line))
+    .filter((line) => line && !/^(еще|Ещё|Odpowiedź|Answer|Assistant|Response|Ответ)\b/i.test(line) && !/^[*–•\s]+$/.test(line))
 
   text = lines.join('\n')
-  text = text.replace(/^[\*\s]+|[\*\s]+$/g, '').replace(/\s{2,}/g, ' ')
+  text = text.replace(/^[*\s]+|[*\s]+$/g, '').replace(/\s{2,}/g, ' ')
   return text.trim()
 }
 
@@ -67,6 +67,17 @@ const normalizeEntry = (entry, fallbackText = '') => {
 const normalizeHistory = (items) => {
   if (!Array.isArray(items)) return []
   return items.map((item) => normalizeEntry(item))
+}
+
+const normalizeStatsData = (items) => {
+  if (!Array.isArray(items)) return []
+  return items.map((item) => normalizeEntry({
+    id: item.id,
+    date: item.timestamp || item.date,
+    score: item.score,
+    og_text: item.og_text,
+    response: item.ai_response || item.response,
+  }))
 }
 
 const computeStats = (entries) => {
@@ -101,6 +112,8 @@ export const AppDataProvider = ({ children }) => {
     moodTrend: [],
   })
   const [recentEntries, setRecentEntries] = useState([])
+  const [weeklyStats, setWeeklyStats] = useState([])
+  const [monthlyStats, setMonthlyStats] = useState([])
   const [quickNote, setQuickNote] = useState('')
   const [theme, setTheme] = useState('dark')
   const [isLoading, setIsLoading] = useState(true)
@@ -128,11 +141,26 @@ export const AppDataProvider = ({ children }) => {
       setError(null)
 
       try {
-        const history = await fetchHistory()
+        // history is general note history, used for the journal and main dashboard.
+        // weekly/monthly requests are only statistics endpoints and do not replace the general history.
+        const [history, weeklyData, monthlyData] = await Promise.all([
+          fetchHistory(),
+          fetchWeeklyStatistics(),
+          fetchMonthlyStatistics(),
+        ])
+
+        console.log('Statistics data loaded:', { history, weeklyData, monthlyData })
+
         if (!active) return
-        const normalized = normalizeHistory(history)
-        setRecentEntries(normalized)
-        setStats(computeStats(normalized))
+
+        const normalizedHistory = normalizeHistory(history)
+        const normalizedWeekly = normalizeStatsData(weeklyData)
+        const normalizedMonthly = normalizeStatsData(monthlyData)
+
+        setRecentEntries(normalizedHistory)
+        setWeeklyStats(normalizedWeekly)
+        setMonthlyStats(normalizedMonthly)
+        setStats(computeStats(normalizedHistory))
       } catch (err) {
         if (!active) return
         setError(err)
@@ -175,6 +203,8 @@ export const AppDataProvider = ({ children }) => {
       setActiveMenu,
       stats,
       recentEntries,
+      weeklyStats,
+      monthlyStats,
       quickNote,
       setQuickNote,
       theme,
@@ -189,6 +219,8 @@ export const AppDataProvider = ({ children }) => {
       activeMenu,
       stats,
       recentEntries,
+      weeklyStats,
+      monthlyStats,
       quickNote,
       theme,
       saveNote,
@@ -201,6 +233,7 @@ export const AppDataProvider = ({ children }) => {
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAppData = () => {
   const context = useContext(AppDataContext)
   if (!context) {
