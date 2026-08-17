@@ -10,7 +10,7 @@ data first, locally.
 
 🏆 Built at the **final round of the Kielce University of Technology hackathon** (April
 2026) — a team of five, one night, 50 commits.
-🎥 **[Demo video](https://github.com/HeorhiHalavach/hakaton-AI/releases/download/demo/Video.mp4)** · 📄 **[Full technical documentation (PL)](docs/README.md)**
+🎥 **[Demo video](https://github.com/HeorhiHalavach/hackathon-AI/releases/download/demo/Video.mp4)** · 📄 **[Full technical documentation (PL)](docs/README.md)**
 · 🔌 **[OpenAPI spec](docs/openapi.yaml)**
 
 ![Nawigator Umysłu — the journal screen](docs/screenshot.png)
